@@ -1,0 +1,26 @@
+# Frontend - Next.js
+node_modules/
+.next/
+out/
+coverage/
+.vercel/
+
+# Environment variables and secrets
+.env*
+!.env.example
+
+# Backend - ASP.NET Core
+**/bin/
+**/obj/
+.vs/
+TestResults/
+*.user
+*.suo
+
+# Logs
+*.log
+
+# IDE and OS
+.idea/
+.DS_Store
+Thumbs.db

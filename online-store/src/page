@@ -1,0 +1,1089 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import { useParams } from "next/navigation";
+
+// import {
+//     Clock,
+//     Users,
+//     Star,
+//     BadgeCheck,
+//     CheckCircle2,
+//     PlayCircle,
+//     Award,
+//     ChevronDown,
+//     MessageSquare,
+//     ThumbsUp,
+//     CalendarDays,
+//     ChartNoAxesColumnIncreasing,
+//     UserRound,
+//     Share2,
+//     Send,
+//     ClipboardList,
+// } from "lucide-react";
+
+// import { FaLinkedinIn } from "react-icons/fa";
+// import { FaXTwitter } from "react-icons/fa6";
+
+// import useCountdown from "@/hooks/useCountdown";
+// import useCurriculum from "@/hooks/useCurriculum";
+// import useGlobalDiscount from "@/hooks/useGlobalDiscount";
+
+// import TimeBox from "@/app/(main)/components/Courses/TimeBox";
+// import CommentsSection from "@/app/(main)/components/Courses/CommentsSection";
+
+// const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// /* =========================================================
+//    HELPERS
+// ========================================================= */
+
+// function formatToman(value) {
+//     if (!value) return "رایگان";
+
+//     return new Intl.NumberFormat("fa-IR").format(value) + " تومان";
+// }
+
+// function formatDuration(minutes) {
+//     if (!minutes) return "0 دقیقه";
+
+//     const hours = Math.floor(minutes / 60);
+//     const mins = minutes % 60;
+
+//     if (hours === 0) {
+//         return `${mins} دقیقه`;
+//     }
+
+//     if (mins === 0) {
+//         return `${hours} ساعت`;
+//     }
+
+//     return `${hours} ساعت و ${mins} دقیقه`;
+// }
+
+// /* =========================================================
+//    SHARED GLASS CARD
+// ========================================================= */
+
+// function Panel({ children, className = "" }) {
+//     return (
+//         <div
+//             className={`
+//                 rounded-2xl
+//                 border border-white/[0.09]
+//                 bg-[#0b1020]/75
+//                 backdrop-blur-xl
+//                 shadow-[0_18px_50px_rgba(0,0,0,0.18)]
+//                 ${className}
+//             `}
+//         >
+//             {children}
+//         </div>
+//     );
+// }
+
+// /* =========================================================
+//    STAT CARD
+// ========================================================= */
+
+// function StatCard({ icon: Icon, label, value, tone = "cyan" }) {
+//     const iconTone = tone === "pink" ? "border-pink-400/25 bg-pink-400/10 text-pink-300" : "border-cyan-300/25 bg-cyan-300/10 text-cyan-300";
+
+//     return (
+//         <Panel
+//             className="
+//                 flex
+//                 min-h-[104px]
+//                 items-center
+//                 justify-between
+//                 gap-4
+//                 px-4
+//                 py-4
+//                 sm:px-5
+//             "
+//         >
+//             <div className="min-w-0">
+//                 <span className="block text-base font-extrabold leading-6 text-white sm:text-lg">{value}</span>
+
+//                 <span className="mt-1.5 block text-sm text-white/50">{label}</span>
+//             </div>
+
+//             <div
+//                 className={`
+//                     flex
+//                     h-10
+//                     w-10
+//                     shrink-0
+//                     items-center
+//                     justify-center
+//                     rounded-full
+//                     border
+//                     ${iconTone}
+//                 `}
+//             >
+//                 <Icon className="h-5 w-5" strokeWidth={1.5} />
+//             </div>
+//         </Panel>
+//     );
+// }
+
+// /* =========================================================
+//    COURSE DETAIL PAGE
+// ========================================================= */
+
+// export default function CourseDetailPage() {
+//     const { slug } = useParams();
+
+//     const [selectedLesson, setSelectedLesson] = useState(null);
+//     const [course, setCourse] = useState(null);
+//     const [loading, setLoading] = useState(true);
+//     const [error, setError] = useState("");
+//     const [openModules, setOpenModules] = useState([]);
+
+//     const { curriculum, loading: curriculumLoading, error: curriculumError } = useCurriculum(course?.id);
+
+//     const { discount } = useGlobalDiscount();
+
+//     const { h, m, s } = useCountdown(discount?.endDate);
+
+//     /* =========================================================
+//        GET COURSE
+//     ========================================================= */
+
+//     useEffect(() => {
+//         if (!slug) return;
+
+//         async function fetchCourse() {
+//             try {
+//                 setLoading(true);
+//                 setError("");
+
+//                 const response = await fetch(`${API_URL}/Courses/slug/${slug}`);
+
+//                 if (!response.ok) {
+//                     throw new Error("دوره پیدا نشد");
+//                 }
+
+//                 const data = await response.json();
+
+//                 setCourse(data);
+//             } catch (error) {
+//                 console.error("Course error:", error);
+
+//                 setError(error.message);
+//             } finally {
+//                 setLoading(false);
+//             }
+//         }
+
+//         fetchCourse();
+//     }, [slug]);
+
+//     /* =========================================================
+//        TOGGLE CURRICULUM
+//     ========================================================= */
+
+//     const toggleModule = (index) => {
+//         setOpenModules((previous) => {
+//             if (previous.includes(index)) {
+//                 return previous.filter((item) => item !== index);
+//             }
+
+//             return [...previous, index];
+//         });
+//     };
+
+//     /* =========================================================
+//        LOADING
+//     ========================================================= */
+
+//     if (loading) {
+//         return (
+//             <main className="flex min-h-screen items-center justify-center text-white">
+//                 <p className="text-slate-400">در حال دریافت اطلاعات دوره...</p>
+//             </main>
+//         );
+//     }
+
+//     /* =========================================================
+//        ERROR
+//     ========================================================= */
+
+//     if (error || !course) {
+//         return (
+//             <main className="flex min-h-screen items-center justify-center text-white">
+//                 <p className="text-red-400">{error || "دوره پیدا نشد"}</p>
+//             </main>
+//         );
+//     }
+
+//     /* =========================================================
+//        COURSE VALUES
+//     ========================================================= */
+
+//     const price = course.price ?? 0;
+
+//     let finalPrice = price;
+//     let discountAmount = 0;
+//     let discountPercent = 0;
+
+//     if (discount) {
+//         if (discount.type === "Percentage") {
+//             discountAmount = (price * discount.value) / 100;
+
+//             if (discount.maximumDiscount != null && discountAmount > discount.maximumDiscount) {
+//                 discountAmount = discount.maximumDiscount;
+//             }
+//         }
+
+//         if (discount.type === "FixedAmount") {
+//             discountAmount = discount.value;
+//         }
+
+//         if (discountAmount > price) {
+//             discountAmount = price;
+//         }
+
+//         finalPrice = price - discountAmount;
+
+//         discountPercent = price > 0 ? Math.round((discountAmount / price) * 100) : 0;
+//     }
+
+//     const totalLessons = curriculum.reduce((total, module) => total + (module.lessons?.length || 0), 0);
+
+//     const totalMinutes = curriculum.reduce((total, module) => total + (module.lessons || []).reduce((lessonTotal, lesson) => lessonTotal + (lesson.durationMinutes || 0), 0), 0);
+
+//     return (
+//         <div
+//             dir="rtl"
+//             className="min-h-screen text-white"
+//             style={{
+//                 fontFamily: "var(--font-vazir, sans-serif)",
+//             }}
+//         >
+//             {/* =====================================================
+//                 HERO
+//             ===================================================== */}
+
+//             <section className="relative overflow-hidden pt-28 md:pt-32">
+//                 {/* Background Grid */}
+
+//                 <div
+//                     className="
+//                         pointer-events-none
+//                         absolute
+//                         inset-0
+//                         opacity-[0.15]
+//                     "
+//                     style={{
+//                         backgroundImage: "linear-gradient(rgba(34,211,238,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.5) 1px, transparent 1px)",
+//                         backgroundSize: "42px 42px",
+//                         maskImage: "radial-gradient(ellipse at 30% 0%, black 0%, transparent 70%)",
+//                     }}
+//                 />
+
+//                 <div
+//                     className="
+//                         relative
+//                         mx-auto
+//                         grid
+//                         max-w-7xl
+//                         grid-cols-1
+//                         gap-10
+//                         px-4
+//                         pb-16
+//                         pt-8
+//                         md:grid-cols-[1.35fr_1fr]
+//                         md:gap-12
+//                         md:pb-20
+//                         md:pt-6
+//                     "
+//                 >
+//                     {/* =================================================
+//                         LEFT COLUMN
+//                     ================================================= */}
+
+//                     <div className="flex flex-col gap-6">
+//                         {/* Category + Title + Description */}
+
+//                         <div className="space-y-4">
+//                             {course.category?.name && (
+//                                 <span
+//                                     className="
+//                                         inline-flex
+//                                         w-fit
+//                                         items-center
+//                                         rounded-full
+//                                         border
+//                                         border-cyan-400/30
+//                                         bg-cyan-400/10
+//                                         px-3
+//                                         py-1
+//                                         text-xs
+//                                         text-cyan-300
+//                                     "
+//                                 >
+//                                     {course.category.name}
+//                                 </span>
+//                             )}
+
+//                             <h1
+//                                 className="
+//                                     bg-gradient-to-r
+//                                     from-cyan-300
+//                                     via-blue-400
+//                                     to-pink-400
+//                                     bg-clip-text
+//                                     text-2xl
+//                                     font-extrabold
+//                                     leading-snug
+//                                     text-transparent
+//                                     md:text-4xl
+//                                 "
+//                             >
+//                                 {course.title}
+//                             </h1>
+
+//                             {course.description && (
+//                                 <p
+//                                     className="
+//                                         max-w-xl
+//                                         text-sm
+//                                         leading-7
+//                                         text-white/70
+//                                         md:text-base
+//                                     "
+//                                 >
+//                                     {course.description}
+//                                 </p>
+//                             )}
+
+//                             {/* Meta */}
+
+//                             <div
+//                                 className="
+//                                     flex
+//                                     flex-wrap
+//                                     items-center
+//                                     gap-x-5
+//                                     gap-y-3
+//                                     pt-1
+//                                     text-sm
+//                                     text-white/70
+//                                 "
+//                             >
+//                                 <span className="flex items-center gap-1.5">
+//                                     <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+
+//                                     <span className="font-semibold text-white">{course.rating ?? 0}</span>
+
+//                                     <span>({course.ratingCount ?? 0} نظر)</span>
+//                                 </span>
+
+//                                 <span className="flex items-center gap-1.5">
+//                                     <Users className="h-4 w-4 text-cyan-300" />
+//                                     {course.studentCount ?? 0} دانشجو
+//                                 </span>
+
+//                                 <span className="flex items-center gap-1.5">
+//                                     <Clock className="h-4 w-4 text-cyan-300" />
+
+//                                     {formatDuration(totalMinutes)}
+//                                 </span>
+
+//                                 <span className="flex items-center gap-1.5">
+//                                     <Award className="h-4 w-4 text-pink-400" />
+
+//                                     {course.level ?? "مقدماتی"}
+//                                 </span>
+//                             </div>
+//                         </div>
+
+//                         {/* =================================================
+//                             DISCOUNT BANNER
+//                         ================================================= */}
+
+//                         {course.discountEndsAt && (
+//                             <div
+//                                 className="
+//                                     flex
+//                                     w-fit
+//                                     max-w-full
+//                                     flex-wrap
+//                                     items-center
+//                                     gap-5
+//                                     rounded-xl
+//                                     border
+//                                     border-pink-400/15
+//                                     bg-pink-400/[0.04]
+//                                     px-4
+//                                     py-2.5
+//                                     backdrop-blur-xl
+//                                 "
+//                             >
+//                                 <div className="flex items-center gap-2">
+//                                     <span className="text-sm font-bold text-pink-300">{discountPercent > 0 ? `${discountPercent}٪` : "تخفیف"}</span>
+
+//                                     <span className="text-xs text-white/60">تخفیف ویژه</span>
+//                                 </div>
+
+//                                 <div className="flex items-center gap-1.5" dir="ltr">
+//                                     <span className="rounded-md bg-white/[0.06] px-2 py-1 text-xs font-semibold tabular-nums text-white/80">{String(h).padStart(2, "0")}</span>
+
+//                                     <span className="text-pink-300/50">:</span>
+
+//                                     <span className="rounded-md bg-white/[0.06] px-2 py-1 text-xs font-semibold tabular-nums text-white/80">{String(m).padStart(2, "0")}</span>
+
+//                                     <span className="text-pink-300/50">:</span>
+
+//                                     <span className="rounded-md bg-white/[0.06] px-2 py-1 text-xs font-semibold tabular-nums text-white/80">{String(s).padStart(2, "0")}</span>
+//                                 </div>
+//                             </div>
+//                         )}
+
+//                         {/* =================================================
+//                             COUNTDOWN + CART + PRICE
+//                         ================================================= */}
+
+//                         <div className="space-y-3">
+//                             {discount && (
+//                                 <div
+//                                     className="
+//                                         flex
+//                                         w-full
+//                                         flex-col
+//                                         gap-3
+//                                         rounded-xl
+//                                         border
+//                                         border-white/10
+//                                         bg-white/[0.04]
+//                                         px-4
+//                                         py-3
+//                                         backdrop-blur-xl
+//                                         sm:flex-row
+//                                         sm:items-center
+//                                         sm:justify-between
+//                                     "
+//                                 >
+//                                     <span className="text-xs font-bold text-pink-300">تا پایان تخفیف {discountPercent}٪</span>
+
+//                                     <div className="flex items-center gap-1.5" dir="ltr">
+//                                         <TimeBox value={h} label="ساعت" />
+
+//                                         <span className="text-white/30">:</span>
+
+//                                         <TimeBox value={m} label="دقیقه" />
+
+//                                         <span className="text-white/30">:</span>
+
+//                                         <TimeBox value={s} label="ثانیه" />
+//                                     </div>
+//                                 </div>
+//                             )}
+
+//                             {/* Cart + Price */}
+
+//                             <div
+//                                 className="
+//                                     flex
+//                                     w-full
+//                                     flex-col
+//                                     gap-3
+//                                     sm:flex-row
+//                                 "
+//                             >
+//                                 <button
+//                                     type="button"
+//                                     className="
+//                                         group
+//                                         relative
+//                                         min-h-[58px]
+//                                         flex-1
+//                                         overflow-hidden
+//                                         rounded-xl
+//                                         border
+//                                         border-cyan-300/15
+//                                         bg-white/[0.035]
+//                                         px-6
+//                                         py-3
+//                                         text-sm
+//                                         font-semibold
+//                                         text-white
+//                                         transition-all
+//                                         duration-300
+//                                         hover:border-cyan-300/30
+//                                     "
+//                                 >
+//                                     <span
+//                                         className="
+//                                             pointer-events-none
+//                                             absolute
+//                                             inset-y-[-20%]
+//                                             -left-[70%]
+//                                             w-[45%]
+//                                             rotate-[18deg]
+//                                             bg-gradient-to-r
+//                                             from-transparent
+//                                             via-white/25
+//                                             to-transparent
+//                                             blur-md
+//                                             transition-all
+//                                             duration-700
+//                                             ease-out
+//                                             group-hover:left-[125%]
+//                                         "
+//                                     />
+
+//                                     <span
+//                                         className="
+//                                             relative
+//                                             z-10
+//                                             text-[15px]
+//                                             font-medium
+//                                             text-white/90
+//                                             transition-colors
+//                                             duration-300
+//                                             group-hover:text-cyan-100
+//                                         "
+//                                     >
+//                                         افزودن به سبد خرید
+//                                     </span>
+//                                 </button>
+
+//                                 <Panel
+//                                     className="
+//                                         flex
+//                                         min-h-[58px]
+//                                         shrink-0
+//                                         items-center
+//                                         justify-between
+//                                         gap-4
+//                                         px-4
+//                                         py-3
+//                                         sm:w-auto
+//                                         sm:justify-start
+//                                         sm:px-5
+//                                     "
+//                                 >
+//                                     <div className="flex flex-col items-start">
+//                                         <span className="text-[11px] text-white/40">قیمت دوره</span>
+
+//                                         <span
+//                                             className="
+//                                                 whitespace-nowrap
+//                                                 text-xl
+//                                                 font-extrabold
+//                                                 leading-tight
+//                                                 text-cyan-300
+//                                             "
+//                                         >
+//                                             {formatToman(finalPrice)}
+//                                         </span>
+//                                     </div>
+
+//                                     {discount && (
+//                                         <div
+//                                             className="
+//                                                 flex
+//                                                 flex-col
+//                                                 items-start
+//                                                 gap-1
+//                                                 border-r
+//                                                 border-white/10
+//                                                 pr-4
+//                                             "
+//                                         >
+//                                             <span className="whitespace-nowrap text-xs text-white/30 line-through">{formatToman(price)}</span>
+
+//                                             <span className="whitespace-nowrap rounded-full bg-pink-400/15 px-2 py-0.5 text-[11px] font-bold text-pink-300">{discountPercent}٪ تخفیف</span>
+//                                         </div>
+//                                     )}
+//                                 </Panel>
+//                             </div>
+//                         </div>
+
+//                         {/* ================================================= 
+//     COURSE STATS
+// ================================================= */}
+
+//                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+//                             <StatCard icon={Clock} label="مدت زمان دوره" value={formatDuration(course.durationMinutes)} tone="cyan" />
+
+//                             <StatCard icon={Award} label="سطح دوره" value={course.level} tone="pink" />
+
+//                             <StatCard icon={ClipboardList} label="تعداد فصل‌ها" value={`${curriculum.length} فصل`} tone="cyan" />
+
+//                             <StatCard icon={PlayCircle} label="تعداد جلسات" value={`${totalLessons} جلسه`} tone="pink" />
+
+//                             <StatCard icon={CheckCircle2} label="پیش‌نیازها" value={course.prerequisites?.length > 0 ? `${course.prerequisites.length} دوره` : "بدون پیش‌نیاز"} tone="cyan" />
+
+//                             <StatCard icon={CalendarDays} label="تاریخ ایجاد دوره" value={new Date(course.createdAt).toLocaleDateString("fa-IR")} tone="pink" />
+//                         </div>
+
+//                         {/* =================================================
+//                             PREREQUISITES
+//                         ================================================= */}
+
+//                         <Panel className="w-full p-5 sm:p-6">
+//                             <div className="mb-5 flex items-center justify-between gap-3">
+//                                 <h2 className="text-base font-bold text-white">پیش‌نیازها</h2>
+
+//                                 <div className="h-1 w-8 rounded-full bg-gradient-to-r from-cyan-300 to-pink-400" />
+//                             </div>
+
+//                             {course.prerequisites?.length > 0 ? (
+//                                 <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+//                                     {course.prerequisites.map((prerequisite) => (
+//                                         <li
+//                                             key={prerequisite.id}
+//                                             className="
+//                                                     flex
+//                                                     items-center
+//                                                     gap-2.5
+//                                                     rounded-xl
+//                                                     border
+//                                                     border-white/[0.06]
+//                                                     bg-white/[0.025]
+//                                                     px-3.5
+//                                                     py-3
+//                                                     text-sm
+//                                                     text-white/75
+//                                                     transition-colors
+//                                                     hover:border-cyan-300/15
+//                                                     hover:bg-cyan-300/[0.03]
+//                                                 "
+//                                         >
+//                                             <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-300" />
+
+//                                             <span>{prerequisite.title}</span>
+//                                         </li>
+//                                     ))}
+//                                 </ul>
+//                             ) : (
+//                                 <div className="flex items-center gap-2.5 text-sm text-white/70">
+//                                     <CheckCircle2 className="h-4 w-4 shrink-0 text-cyan-300" />
+
+//                                     <span>بدون پیش‌نیاز</span>
+//                                 </div>
+//                             )}
+//                         </Panel>
+//                     </div>
+
+//                     {/* =====================================================
+//                         RIGHT COLUMN
+//                     ===================================================== */}
+
+//                     <div className="flex self-start flex-col gap-5 lg:sticky lg:top-28">
+//                         {/* Thumbnail */}
+
+//                         <div
+//                             className="
+//                                 relative
+//                                 aspect-video
+//                                 w-full
+//                                 overflow-hidden
+//                                 rounded-2xl
+//                                 border
+//                                 border-white/[0.09]
+//                                 bg-[#0b1020]/70
+//                                 shadow-[0_20px_60px_rgba(0,0,0,0.28)]
+//                             "
+//                         >
+//                             <div
+//                                 className="
+//                                     pointer-events-none
+//                                     absolute
+//                                     -inset-10
+//                                     -z-10
+//                                     bg-[radial-gradient(circle_at_25%_20%,rgba(34,211,238,0.16),transparent_45%),radial-gradient(circle_at_85%_75%,rgba(236,72,153,0.14),transparent_45%)]
+//                                     blur-2xl
+//                                 "
+//                             />
+
+//                             {course.thumbnailId ? (
+//                                 <img
+//                                     src={`${API_URL}/Files/${course.thumbnailId}`}
+//                                     alt={course.title}
+//                                     className="
+//                                         h-full
+//                                         w-full
+//                                         object-cover
+//                                         transition-transform
+//                                         duration-500
+//                                         hover:scale-105
+//                                     "
+//                                 />
+//                             ) : (
+//                                 <div className="flex h-full items-center justify-center bg-white/5 text-white/30">تصویر دوره</div>
+//                             )}
+//                         </div>
+
+//                         {/* Instructor */}
+
+//                         {course.instructor && (
+//                             <Panel className="w-full p-5 sm:p-6">
+//                                 <h2 className="mb-5 text-base font-bold text-white">مدرس دوره</h2>
+
+//                                 <div className="flex items-start gap-4">
+//                                     {course.instructor.avatarId && (
+//                                         <img
+//                                             src={`${API_URL}/Files/${course.instructor.avatarId}`}
+//                                             alt={course.instructor.userName}
+//                                             className="
+//                                                 h-16
+//                                                 w-16
+//                                                 shrink-0
+//                                                 rounded-full
+//                                                 border-2
+//                                                 border-cyan-300/30
+//                                                 object-cover
+//                                                 sm:h-[72px]
+//                                                 sm:w-[72px]
+//                                             "
+//                                         />
+//                                     )}
+
+//                                     <div className="min-w-0 space-y-1.5">
+//                                         <div className="flex items-center gap-2">
+//                                             <h3 className="text-base font-bold text-white">{course.instructor.userName}</h3>
+
+//                                             <BadgeCheck className="h-4 w-4 text-cyan-300" />
+//                                         </div>
+
+//                                         {course.instructor.expertise && <p className="text-sm text-pink-300">{course.instructor.expertise}</p>}
+
+//                                         {course.instructor.bio && <p className="line-clamp-3 text-sm leading-6 text-white/60">{course.instructor.bio}</p>}
+//                                     </div>
+//                                 </div>
+//                             </Panel>
+//                         )}
+
+//                         {/* Share */}
+
+//                         <Panel className="w-full px-4 py-4 sm:px-5">
+//                             <div className="flex items-center justify-between gap-4">
+//                                 <div className="flex items-center gap-2.5">
+//                                     <div
+//                                         className="
+//                                             flex
+//                                             h-9
+//                                             w-9
+//                                             items-center
+//                                             justify-center
+//                                             rounded-xl
+//                                             border
+//                                             border-blue-400/15
+//                                             bg-gradient-to-br
+//                                             from-blue-500/10
+//                                             via-violet-500/10
+//                                             to-pink-500/10
+//                                             text-slate-300
+//                                         "
+//                                     >
+//                                         <Share2 className="h-[18px] w-[18px]" strokeWidth={1.8} />
+//                                     </div>
+
+//                                     <span className="text-sm font-semibold text-slate-200">اشتراک گذاری</span>
+//                                 </div>
+
+//                                 <div className="flex items-center gap-2">
+//                                     <button
+//                                         type="button"
+//                                         aria-label="اشتراک‌گذاری در X"
+//                                         className="
+//                                             flex
+//                                             h-10
+//                                             w-10
+//                                             items-center
+//                                             justify-center
+//                                             rounded-xl
+//                                             border
+//                                             border-white/[0.08]
+//                                             bg-white/[0.04]
+//                                             text-slate-400
+//                                             transition-all
+//                                             duration-300
+//                                             hover:-translate-y-0.5
+//                                             hover:border-blue-400/30
+//                                             hover:bg-blue-500/10
+//                                             hover:text-blue-300
+//                                         "
+//                                     >
+//                                         <FaXTwitter className="h-[17px] w-[17px]" />
+//                                     </button>
+
+//                                     <button
+//                                         type="button"
+//                                         aria-label="اشتراک‌گذاری در LinkedIn"
+//                                         className="
+//                                             flex
+//                                             h-10
+//                                             w-10
+//                                             items-center
+//                                             justify-center
+//                                             rounded-xl
+//                                             border
+//                                             border-white/[0.08]
+//                                             bg-white/[0.04]
+//                                             text-slate-400
+//                                             transition-all
+//                                             duration-300
+//                                             hover:-translate-y-0.5
+//                                             hover:border-blue-400/30
+//                                             hover:bg-blue-500/10
+//                                             hover:text-blue-300
+//                                         "
+//                                     >
+//                                         <FaLinkedinIn className="h-[17px] w-[17px]" />
+//                                     </button>
+
+//                                     <button
+//                                         type="button"
+//                                         aria-label="اشتراک‌گذاری در تلگرام"
+//                                         className="
+//                                             flex
+//                                             h-10
+//                                             w-10
+//                                             items-center
+//                                             justify-center
+//                                             rounded-xl
+//                                             border
+//                                             border-white/[0.08]
+//                                             bg-white/[0.04]
+//                                             text-slate-400
+//                                             transition-all
+//                                             duration-300
+//                                             hover:-translate-y-0.5
+//                                             hover:border-pink-400/30
+//                                             hover:bg-pink-500/10
+//                                             hover:text-pink-300
+//                                         "
+//                                     >
+//                                         <Send className="h-[17px] w-[17px]" />
+//                                     </button>
+//                                 </div>
+//                             </div>
+//                         </Panel>
+
+//                         {/* About */}
+
+//                         <Panel className="w-full p-5 md:p-7">
+//                             <h2 className="mb-4 text-lg font-bold text-white">درباره‌ی دوره</h2>
+
+//                             <p className="text-sm leading-7 text-white/70 md:text-[15px]">{course.description}</p>
+//                         </Panel>
+//                     </div>
+//                 </div>
+//             </section>
+
+//             {/* =========================================================
+//                 BODY
+//             ========================================================= */}
+
+//             <section
+//                 className="
+//                     mx-auto
+//                     max-w-7xl
+//                     px-4
+//                     pb-16
+//                     pt-4
+//                     md:pb-24
+//                     md:pt-8
+//                 "
+//             >
+//                 <div className="flex flex-col gap-8">
+//                     {/* =================================================
+//                         WHAT YOU WILL LEARN
+//                     ================================================= */}
+
+//                     {course.learnPoints?.length > 0 && (
+//                         <Panel className="p-6 md:p-8">
+//                             <h2 className="mb-6 text-lg font-bold text-white">در این دوره چه می‌آموزید</h2>
+
+//                             <ul className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+//                                 {course.learnPoints.map((point, index) => (
+//                                     <li
+//                                         key={index}
+//                                         className="
+//                                                 flex
+//                                                 items-start
+//                                                 gap-2.5
+//                                                 rounded-xl
+//                                                 border
+//                                                 border-white/[0.06]
+//                                                 bg-white/[0.02]
+//                                                 px-3.5
+//                                                 py-3
+//                                                 text-sm
+//                                                 text-white/75
+//                                             "
+//                                     >
+//                                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
+
+//                                         <span>{point}</span>
+//                                     </li>
+//                                 ))}
+//                             </ul>
+//                         </Panel>
+//                     )}
+
+//                     {/* =================================================
+//                         CURRICULUM
+//                     ================================================= */}
+
+//                     <Panel className="p-6 md:p-8">
+//                         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+//                             <h2 className="text-lg font-bold text-white">سرفصل‌های دوره</h2>
+
+//                             <span className="text-xs text-white/50">
+//                                 {curriculum.length} فصل {totalLessons} جلسه {formatDuration(totalMinutes)}
+//                             </span>
+//                         </div>
+
+//                         {curriculumLoading && <div className="py-10 text-center text-sm text-white/40">در حال دریافت سرفصل‌ها...</div>}
+
+//                         {!curriculumLoading && curriculumError && <div className="py-10 text-center text-sm text-red-400">دریافت سرفصل‌ها با خطا مواجه شد.</div>}
+
+//                         {!curriculumLoading && !curriculumError && curriculum.length === 0 && <div className="py-10 text-center text-sm text-white/40">هنوز سرفصلی برای این دوره ثبت نشده است.</div>}
+
+//                         {!curriculumLoading && !curriculumError && curriculum.length > 0 && (
+//                             <div className="flex flex-col gap-3">
+//                                 {curriculum.map((module, index) => {
+//                                     const isOpen = openModules.includes(index);
+
+//                                     return (
+//                                         <div
+//                                             key={module.id}
+//                                             className="
+//                                                         overflow-hidden
+//                                                         rounded-xl
+//                                                         border
+//                                                         border-white/10
+//                                                         bg-white/[0.03]
+//                                                     "
+//                                         >
+//                                             {/* Module Header */}
+
+//                                             <button
+//                                                 type="button"
+//                                                 onClick={() => toggleModule(index)}
+//                                                 className="
+//                                                             flex
+//                                                             w-full
+//                                                             items-center
+//                                                             justify-between
+//                                                             gap-3
+//                                                             px-4
+//                                                             py-4
+//                                                             text-right
+//                                                             transition-colors
+//                                                             hover:bg-white/[0.025]
+//                                                         "
+//                                             >
+//                                                 <span className="flex items-center gap-3">
+//                                                     <ChevronDown
+//                                                         className={`
+//                                                                     h-4
+//                                                                     w-4
+//                                                                     shrink-0
+//                                                                     text-cyan-300
+//                                                                     transition-transform
+//                                                                     ${isOpen ? "rotate-180" : ""}
+//                                                                 `}
+//                                                     />
+
+//                                                     <span className="text-sm font-semibold text-white">
+//                                                         {index + 1}. {module.title}
+//                                                     </span>
+//                                                 </span>
+
+//                                                 <span className="shrink-0 text-xs text-white/50">{module.lessons?.length || 0} جلسه</span>
+//                                             </button>
+
+//                                             {/* Lessons */}
+
+//                                             {isOpen && (
+//                                                 <div className="border-t border-white/10 px-4 py-2">
+//                                                     {module.lessons?.map((lesson) => {
+//                                                         const isSelected = selectedLesson?.id === lesson.id;
+
+//                                                         return (
+//                                                             <div key={lesson.id} className="border-b border-white/5 last:border-b-0">
+//                                                                 <button
+//                                                                     type="button"
+//                                                                     onClick={() => setSelectedLesson(isSelected ? null : lesson)}
+//                                                                     className="
+//                                                                                     flex
+//                                                                                     w-full
+//                                                                                     items-center
+//                                                                                     justify-between
+//                                                                                     gap-3
+//                                                                                     py-3
+//                                                                                     text-right
+//                                                                                     text-sm
+//                                                                                     text-white/70
+//                                                                                     transition-colors
+//                                                                                     hover:text-white
+//                                                                                 "
+//                                                                 >
+//                                                                     <span className="flex min-w-0 items-center gap-2.5">
+//                                                                         <PlayCircle
+//                                                                             className={`
+//                                                                                             h-4
+//                                                                                             w-4
+//                                                                                             shrink-0
+//                                                                                             ${isSelected ? "text-cyan-300" : "text-white/40"}
+//                                                                                         `}
+//                                                                         />
+
+//                                                                         <span className="truncate">{lesson.title}</span>
+//                                                                     </span>
+
+//                                                                     <span className="flex shrink-0 items-center gap-3">
+//                                                                         {lesson.isFree && (
+//                                                                             <span className="hidden rounded-md bg-cyan-400/10 px-2 py-0.5 text-[11px] text-cyan-300 sm:inline-block">
+//                                                                                 پیش‌نمایش رایگان
+//                                                                             </span>
+//                                                                         )}
+
+//                                                                         <span className="text-xs text-white/40 tabular-nums">{lesson.durationMinutes} دقیقه</span>
+//                                                                     </span>
+//                                                                 </button>
+
+//                                                                 {isSelected && (
+//                                                                     <video
+//                                                                         controls
+//                                                                         autoPlay
+//                                                                         className="
+//                                                                                         mb-4
+//                                                                                         mt-2
+//                                                                                         w-full
+//                                                                                         rounded-xl
+//                                                                                         border
+//                                                                                         border-white/10
+//                                                                                         bg-black
+//                                                                                     "
+//                                                                         src={`${API_URL}/Lesson/${lesson.id}/video`}
+//                                                                     />
+//                                                                 )}
+//                                                             </div>
+//                                                         );
+//                                                     })}
+//                                                 </div>
+//                                             )}
+//                                         </div>
+//                                     );
+//                                 })}
+//                             </div>
+//                         )}
+//                     </Panel>
+
+//                     {/* =========================================================
+//                         COMMENTS
+//                     ========================================================= */}
+//                     <CommentsSection courseId={course.id} instructorId={course.instructorId} />
+//                 </div>
+//             </section>
+//         </div>
+//     );
+// }
