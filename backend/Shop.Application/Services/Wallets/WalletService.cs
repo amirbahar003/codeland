@@ -126,7 +126,8 @@ namespace Shop.Application.Services.Wallets
                 Description = transaction.Description,
                 BalanceAfter = transaction.BalanceAfter,
                 CreatedAt = transaction.CreatedAt,
-                ReferenceId = transaction.ReferenceId
+                ReferenceId = transaction.ReferenceId,
+                IsSeen=transaction.IsSeen,
             }).ToList();
         }
     }

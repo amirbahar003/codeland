@@ -134,18 +134,18 @@ namespace Shop.Application.Services.Authentication
                 var referralCount = updatedReferrer.SuccessfulReferrals;
 
                 // 9. Reward every 10 successful referrals
-                if (referralCount > 0 && referralCount % 10 == 0)
-                {
-                    var rewardNumber = referralCount / 10;
+                var totalRewards = referralCount / 10;
 
-                    var referenceId = $"REFERRAL-{referrer.Id}-{rewardNumber}";
+                for (int i = 1; i <= totalRewards; i++)
+                {
+                    var referenceId = $"REFERRAL-{referrer.Id}-{i}";
 
                     try
                     {
                         await _walletService.AddFundsAsync(
                             referrer.Id,
                             100000,
-                            $"Referral reward number {rewardNumber}",
+                            $"Referral reward number {i}",
                             referenceId
                         );
                     }
@@ -155,8 +155,10 @@ namespace Shop.Application.Services.Authentication
                             ex,
                             "Referral reward failed. ReferrerId: {ReferrerId}, RewardNumber: {RewardNumber}",
                             referrer.Id,
-                            rewardNumber
+                            i
                         );
+
+                        break;
                     }
                 }
             }

@@ -10,5 +10,6 @@ namespace Shop.Application.Interfaces.Wallets.Repository
         Task<List<WalletTransaction>> GetAllByUserIdAsync(string userId);
         Task<bool> ExistsByReferenceIdAsync(string referenceId,IClientSessionHandle? session = null);
         Task<List<WalletTransaction>> GetReferralRewardsAsync(string userId);
+        Task<long> GetUnseenCountAsync(string userId);
     }
 }

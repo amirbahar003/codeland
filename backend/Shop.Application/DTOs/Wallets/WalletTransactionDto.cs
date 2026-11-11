@@ -19,7 +19,7 @@ namespace Shop.Application.DTOs.Wallets
         public long BalanceAfter { get; set; }
 
         public DateTime CreatedAt { get; set; }
-
         public string? ReferenceId { get; set; }
+        public bool IsSeen { get; set; }
     }
 }

@@ -34,7 +34,7 @@ namespace Shop.Infrastructure.Repositories
             }
         }
 
-        public async Task<bool> ExistsByReferenceIdAsync(string referenceId,IClientSessionHandle? session = null)
+        public async Task<bool> ExistsByReferenceIdAsync(string referenceId, IClientSessionHandle? session = null)
         {
             var filter = Builders<WalletTransaction>.Filter.Eq(t => t.ReferenceId, referenceId);
 
@@ -66,6 +66,16 @@ namespace Shop.Infrastructure.Repositories
                 .Find(filter)
                 .SortByDescending(t => t.CreatedAt)
                 .ToListAsync();
+        }
+
+        public async Task<long> GetUnseenCountAsync(string userId)
+        {
+            var filter = Builders<WalletTransaction>.Filter.And(
+                Builders<WalletTransaction>.Filter.Eq(t => t.UserId, userId),
+                Builders<WalletTransaction>.Filter.Eq(t => t.IsSeen, false)
+            );
+
+            return await _transactions.CountDocumentsAsync(filter);
         }
     }
 }
