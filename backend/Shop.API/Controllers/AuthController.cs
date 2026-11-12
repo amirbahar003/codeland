@@ -35,6 +35,27 @@ public class AuthController : ControllerBase
             AvatarId = User.FindFirstValue("AvatarId"),
         });
     }
+
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        await _service.ChangePasswordAsync(userId, dto);
+
+        return Ok(new
+        {
+            message = "رمز عبور با موفقیت تغییر کرد."
+        });
+    }
+
+
+
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {

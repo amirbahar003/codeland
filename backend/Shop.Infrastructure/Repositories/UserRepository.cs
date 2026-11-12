@@ -98,6 +98,25 @@ public class UserRepository : IUserRepository
         );
     }
 
+    public async Task<User?> UpdatePasswordAsync(string userId, string passwordHash)
+    {
+        if (!ObjectId.TryParse(userId, out _))
+            throw new InvalidObjectIdException("Invalid ObjectId.");
+
+        var update = Builders<User>.Update
+            .Set(u => u.PasswordHash, passwordHash)
+            .Set(u => u.UpdatedAt, DateTime.UtcNow);
+
+        return await _users.FindOneAndUpdateAsync(
+            u => u.Id == userId,
+            update,
+            new FindOneAndUpdateOptions<User>
+            {
+                ReturnDocument = ReturnDocument.After
+            }
+        );
+    }
+
     public async Task<User?> UpdateRoleAsync(
         string Id,
         UserRole role)

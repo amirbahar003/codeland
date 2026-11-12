@@ -10,7 +10,7 @@ namespace Shop.Application.Interfaces.Authentication
     public interface IAuthService
     {
         Task<AuthResponseDto> RegisterAsync(RegisterDto dto);
-
+        Task ChangePasswordAsync(string userId, ChangePasswordDto dto);
         Task<AuthResponseDto> LoginAsync(LoginDto dto);
     }
 }

@@ -157,6 +157,28 @@ export default function Sidebar() {
         } catch {}
     };
 
+    const handleChangePassword = async (currentPassword, newPassword) => {
+        const response = await fetch(`${API_URL}/Auth/change-password`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+            }),
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            throw new Error(data?.message || data?.title || "تغییر رمز عبور ناموفق بود.");
+        }
+
+        return data;
+    };
+
     const handleLogout = async () => {
         try {
             const response = await fetch(`${API_URL}/Auth/logout`, {
@@ -352,6 +374,7 @@ export default function Sidebar() {
             <SettingsModal
                 open={settingsOpen}
                 onClose={() => setSettingsOpen(false)}
+                onChangePassword={handleChangePassword}
                 user={{
                     name: user.name,
                     username: user.username,

@@ -28,6 +28,31 @@ namespace Shop.Application.Services.Authentication
             _walletService = walletService;
             _logger = logger;
         }
+
+        public async Task ChangePasswordAsync(string userId, ChangePasswordDto dto)
+        {
+            // پیدا کردن کاربر
+            var user = await _repository.GetByIdAsync(userId);
+
+            if (user == null)
+                throw new NotFoundException("User not found.");
+
+            // بررسی رمز عبور فعلی
+            var isCurrentPasswordValid = _passwordHasher.Verify(
+                dto.CurrentPassword,
+                user.PasswordHash
+            );
+
+            if (!isCurrentPasswordValid)
+                throw new UnauthorizedAccessException("Current password is incorrect.");
+
+            // هش کردن رمز جدید
+            var newPasswordHash = _passwordHasher.Hash(dto.NewPassword);
+
+            // ذخیره رمز جدید
+            await _repository.UpdatePasswordAsync(userId, newPasswordHash);
+        }
+
         public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
         {
             var emailOrMobile = dto.EmailOrMobile.Trim();

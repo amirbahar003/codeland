@@ -176,7 +176,10 @@ export default function SettingsModal({ open, onClose, user, onSaveProfile, onCh
             setConfirm("");
             setMessage({ type: "ok", text: "رمز عبور با موفقیت تغییر کرد" });
         } catch {
-            setMessage({ type: "error", text: "تغییر رمز عبور انجام نشد. رمز فعلی را بررسی کنید." });
+            setMessage({
+                type: "error",
+                text: error.message || "تغییر رمز عبور ناموفق بود. دوباره تلاش کنید.",
+            });
         } finally {
             setSaving(false);
         }
