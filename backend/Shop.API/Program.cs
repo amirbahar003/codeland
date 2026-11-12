@@ -31,6 +31,8 @@ using Shop.Application.Interfaces.LearningStates.Service;
 using Shop.Application.Interfaces.LessonProgreses.Services;
 using Shop.Application.Interfaces.Lessons.Repositories;
 using Shop.Application.Interfaces.Lessons.Services;
+using Shop.Application.Interfaces.Notifications.Repository;
+using Shop.Application.Interfaces.Notifications.Services;
 using Shop.Application.Interfaces.Payments.GateWay;
 using Shop.Application.Interfaces.Payments.Repository;
 using Shop.Application.Interfaces.Payments.Service;
@@ -53,6 +55,7 @@ using Shop.Application.Services.Instructor;
 using Shop.Application.Services.LearningStates;
 using Shop.Application.Services.LessonProgresses;
 using Shop.Application.Services.Lessons;
+using Shop.Application.Services.Notifications;
 using Shop.Application.Services.Payments;
 using Shop.Application.Services.Referrals;
 using Shop.Application.Services.Users;
@@ -332,7 +335,7 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 builder.Services.AddScoped<ILearningStatsRepository, LearningStatsRepository>();
 
-
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // ==================================================
 // Services
@@ -392,6 +395,8 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ILearningStatsService, LearningStatsService>();
 
 builder.Services.AddScoped<IReferralService, ReferralService>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
 // ==================================================
 // Build Application
 // ==================================================

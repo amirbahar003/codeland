@@ -19,11 +19,11 @@ const normalizeIdentifier = (value) => {
 
 // فقط مسیرهای داخلی سایت مجاز هستند (جلوگیری از open redirect)
 const getSafeRedirect = () => {
-    if (typeof window === "undefined") return "/mycodeland";
+    if (typeof window === "undefined") return "/";
 
     const target = new URLSearchParams(window.location.search).get("redirect");
 
-    return target && target.startsWith("/") && !target.startsWith("//") ? target : "/mycodeland";
+    return target && target.startsWith("/") && !target.startsWith("//") ? target : "/";
 };
 
 const validators = {

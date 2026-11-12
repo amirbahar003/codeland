@@ -11,7 +11,8 @@ namespace Shop.Application.Interfaces.Wallets.Service
     {
         Task<WalletDto> GetOrCreateWalletAsync(string userId);
         Task<List<WalletTransactionDto>> GetTransactionsAsync(string userId);
-
         Task AddFundsAsync(string userId,long amount,string description,string referenceId);
+        Task<long> GetUnseenCountAsync(string userId);
+        Task MarkTransactionsAsSeenAsync(string userId);
     }
 }

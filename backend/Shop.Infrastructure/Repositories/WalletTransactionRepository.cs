@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Shop.Application.Interfaces.Wallets.Repository;
@@ -76,6 +75,19 @@ namespace Shop.Infrastructure.Repositories
             );
 
             return await _transactions.CountDocumentsAsync(filter);
+        }
+
+        public async Task MarkAllAsSeenAsync(string userId)
+        {
+            var filter = Builders<WalletTransaction>.Filter.And(
+                Builders<WalletTransaction>.Filter.Eq(t => t.UserId, userId),
+                Builders<WalletTransaction>.Filter.Eq(t => t.IsSeen, false)
+            );
+
+            var update = Builders<WalletTransaction>.Update
+                .Set(t => t.IsSeen, true);
+
+            await _transactions.UpdateManyAsync(filter, update);
         }
     }
 }

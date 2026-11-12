@@ -130,5 +130,21 @@ namespace Shop.Application.Services.Wallets
                 IsSeen=transaction.IsSeen,
             }).ToList();
         }
+
+        public async Task<long> GetUnseenCountAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentException("User ID is required.");
+
+            return await _transactionRepository.GetUnseenCountAsync(userId);
+        }
+
+        public async Task MarkTransactionsAsSeenAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentException("User ID is required.");
+
+            await _transactionRepository.MarkAllAsSeenAsync(userId);
+        }
     }
 }

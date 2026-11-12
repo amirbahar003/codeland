@@ -18,5 +18,6 @@ namespace Shop.Application.Interfaces.Users.Repositories
         Task<bool> ExistsByReferralCodeAsync(string referralCode);
         Task<long> CountReferralsAsync(string userId);
         Task<User?> IncrementSuccessfulReferralsAsync(string userId);
+        Task<User?> UpdatePasswordAsync(string userId, string passwordHash);
     }
 }

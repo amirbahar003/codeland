@@ -44,5 +44,32 @@ namespace Shop.API.Controllers
             return Ok(transactions);
         }
 
+
+        [HttpGet("transactions/unseen-count")]
+        public async Task<IActionResult> GetUnseenTransactionsCount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var count = await _walletService.GetUnseenCountAsync(userId);
+
+            return Ok(count);
+        }
+
+        [HttpPatch("transactions/mark-as-seen")]
+        public async Task<IActionResult> MarkTransactionsAsSeen()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            await _walletService.MarkTransactionsAsSeenAsync(userId);
+
+            return NoContent();
+        }
+
     }
 }

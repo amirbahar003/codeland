@@ -131,7 +131,7 @@ export default function UserMenu({ user }) {
                 <div className="py-2">
                     {/* Dashboard */}
                     <Link
-                        href="/profile"
+                        href="/mycodeland"
                         className="
                             flex items-center gap-3
                             rounded-xl
@@ -150,7 +150,7 @@ export default function UserMenu({ user }) {
 
                     {/* My Courses */}
                     <Link
-                        href="/profile/courses"
+                        href="/mycodeland/courses"
                         className="
                             flex items-center gap-3
                             rounded-xl
@@ -169,7 +169,7 @@ export default function UserMenu({ user }) {
 
                     {/* Orders */}
                     <Link
-                        href="/profile/orders"
+                        href="/mycodeland/transactions"
                         className="
                             flex items-center gap-3
                             rounded-xl
@@ -188,7 +188,7 @@ export default function UserMenu({ user }) {
 
                     {/* Questions */}
                     <Link
-                        href="/profile/questions"
+                        href="/mycodeland/questions"
                         className="
                             flex items-center gap-3
                             rounded-xl

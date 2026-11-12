@@ -14,7 +14,7 @@ const menu = [
     { label: "خانه", href: "/mycodeland", icon: Home },
     { label: "دوره‌ها", href: "/mycodeland/courses", icon: BookOpen },
     { label: "اشتراک", href: "/mycodeland/subscription", icon: Crown },
-    { label: "تراکنش‌ها", href: "/mycodeland/transactions", icon: Receipt, badge: 3 },
+    { label: "تراکنش‌ها", href: "/mycodeland/transactions", icon: Receipt },
     { label: "پرسش و پاسخ", href: "/mycodeland/qa", icon: MessageCircleQuestion },
 ];
 
@@ -24,9 +24,12 @@ const toFa = (v) => String(v).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const [collapsed, setCollapsed] = useState(false); // فقط روی دسکتاپ اثر دارد
+
+    const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [unseenCount, setUnseenCount] = useState(0);
+
     const [user, setUser] = useState({
         name: "",
         phone: "",
@@ -35,6 +38,61 @@ export default function Sidebar() {
         avatar: "",
         plan: "free",
     });
+
+    // مدیریت تعداد تراکنش‌های دیده‌نشده
+    useEffect(() => {
+        let cancelled = false;
+
+        const handleTransactions = async () => {
+            try {
+                // اگر وارد صفحه تراکنش‌ها شده‌ایم
+                if (pathname === "/mycodeland/transactions") {
+                    const response = await fetch(`${API_URL}/Wallet/transactions/mark-as-seen`, {
+                        method: "PATCH",
+                        credentials: "include",
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("علامت‌گذاری تراکنش‌ها ناموفق بود");
+                    }
+
+                    if (!cancelled) {
+                        setUnseenCount(0);
+                    }
+
+                    return;
+                }
+
+                // در سایر صفحات تعداد تراکنش‌های دیده‌نشده را بگیر
+                const response = await fetch(`${API_URL}/Wallet/transactions/unseen-count`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (!response.ok) {
+                    throw new Error("دریافت تعداد تراکنش‌ها ناموفق بود");
+                }
+
+                const count = await response.json();
+
+                if (!cancelled) {
+                    setUnseenCount(count);
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    console.error("خطا در مدیریت تراکنش‌ها:", error);
+                }
+            }
+        };
+
+        handleTransactions();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [pathname]);
+
+    // دریافت اطلاعات کاربر
     useEffect(() => {
         const getUser = async () => {
             try {
@@ -64,34 +122,56 @@ export default function Sidebar() {
 
         getUser();
     }, []);
+
+    // دریافت وضعیت سایدبار از localStorage
     useEffect(() => {
         try {
             setCollapsed(localStorage.getItem(STORAGE_KEY) === "1");
         } catch {}
     }, []);
 
+    // بستن منوی موبایل هنگام تغییر مسیر
     useEffect(() => {
         setMobileOpen(false);
     }, [pathname]);
 
+    // بستن منوی موبایل با کلید Escape
     useEffect(() => {
         if (!mobileOpen) return;
+
         const onKey = (e) => e.key === "Escape" && setMobileOpen(false);
+
         window.addEventListener("keydown", onKey);
+
         return () => window.removeEventListener("keydown", onKey);
     }, [mobileOpen]);
 
+    // باز و بسته کردن سایدبار
     const toggle = () => {
         const next = !collapsed;
+
         setCollapsed(next);
+
         try {
             localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
         } catch {}
     };
 
-    const handleLogout = () => {
-        // TODO: منطق خروج خودت (مثلاً signOut() از next-auth یا پاک کردن توکن)
-        console.log("logout");
+    const handleLogout = async () => {
+        try {
+            const response = await fetch(`${API_URL}/Auth/logout`, {
+                method: "POST",
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error("خروج از حساب ناموفق بود");
+            }
+
+            window.location.href = "/";
+        } catch (error) {
+            console.error("خطا در خروج از حساب:", error);
+        }
     };
 
     const isActive = (href) => (href === "/mycodeland" ? pathname === href : pathname.startsWith(href));
@@ -136,7 +216,7 @@ export default function Sidebar() {
           lg:translate-x-0 lg:bg-white/[0.04]
           ${collapsed ? "lg:w-[76px]" : "lg:w-64"}`}
             >
-                {/* فلش باز و بسته (دسکتاپ) */}
+                {/* فلش باز و بسته دسکتاپ */}
                 <button
                     onClick={toggle}
                     aria-label={collapsed ? "باز کردن سایدبار" : "بستن سایدبار"}
@@ -148,7 +228,7 @@ export default function Sidebar() {
                     {collapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                 </button>
 
-                {/* دکمه بستن (موبایل) */}
+                {/* دکمه بستن موبایل */}
                 <button
                     onClick={() => setMobileOpen(false)}
                     aria-label="بستن منو"
@@ -158,7 +238,7 @@ export default function Sidebar() {
                     <X size={18} />
                 </button>
 
-                {/* کارت کاربر: آواتار، نام، شماره موبایل */}
+                {/* کارت اطلاعات کاربر */}
                 <div
                     className={`mb-4 flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-2.5 pl-12
             lg:pl-2.5 ${collapsed ? "lg:justify-center lg:p-1.5" : ""}`}
@@ -174,8 +254,10 @@ export default function Sidebar() {
                             <UserRound size={22} />
                         </div>
                     )}
+
                     <div className={`min-w-0 ${hideLabel}`}>
                         <p className="truncate text-sm font-bold text-white">{user.name}</p>
+
                         <p dir="ltr" className="truncate text-right text-xs text-white/60">
                             {toFa(user.phone)}
                         </p>
@@ -183,12 +265,14 @@ export default function Sidebar() {
                 </div>
 
                 <p className={`mb-2 px-2 text-xs text-white/50 ${hideLabel}`}>منو</p>
+
                 {collapsed && <div className="mb-2 hidden h-px bg-white/10 lg:block" />}
 
-                {/* آیتم‌ها */}
+                {/* آیتم‌های منو */}
                 <nav aria-label="منوی اصلی" className="flex flex-1 flex-col gap-1">
-                    {menu.map(({ label, href, icon: Icon, badge }) => {
+                    {menu.map(({ label, href, icon: Icon }) => {
                         const active = isActive(href);
+
                         return (
                             <Link
                                 key={href}
@@ -204,8 +288,13 @@ export default function Sidebar() {
 
                                 <span className={`min-w-0 flex-1 truncate text-sm ${hideLabel}`}>{label}</span>
 
-                                {badge && <span className={`rounded-full bg-[#FF2E93] px-2 py-0.5 text-[10px] font-bold text-white ${hideLabel}`}>{toFa(badge)}</span>}
-                                {badge && collapsed && <span className="absolute left-2.5 top-2 hidden h-2 w-2 rounded-full bg-[#FF2E93] lg:block" />}
+                                {/* تعداد تراکنش‌های دیده‌نشده */}
+                                {href === "/mycodeland/transactions" && unseenCount > 0 && (
+                                    <span className={`rounded-full bg-[#FF2E93] px-2 py-0.5 text-[10px] font-bold text-white ${hideLabel}`}>{toFa(unseenCount)}</span>
+                                )}
+
+                                {/* نقطه در حالت جمع‌شده */}
+                                {href === "/mycodeland/transactions" && unseenCount > 0 && collapsed && <span className="absolute left-2.5 top-2 hidden h-2 w-2 rounded-full bg-[#FF2E93] lg:block" />}
 
                                 <Tooltip>{label}</Tooltip>
                             </Link>
@@ -221,6 +310,7 @@ export default function Sidebar() {
               px-3 py-3 text-white transition-opacity hover:opacity-90 ${centerWhenCollapsed} ${focusRing}`}
                     >
                         <Rocket size={20} className="shrink-0" />
+
                         <span className={`truncate text-sm font-bold ${hideLabel}`}>ارتقا به اشتراک ویژه</span>
                     </Link>
                 )}
@@ -238,7 +328,9 @@ export default function Sidebar() {
         text-white/70 transition-colors hover:bg-white/5 hover:text-[#22D3EE] ${focusRing}`}
                     >
                         <Settings size={20} className="shrink-0" />
+
                         <span className={`text-sm ${hideLabel}`}>تنظیمات</span>
+
                         <Tooltip>تنظیمات</Tooltip>
                     </button>
 
@@ -249,7 +341,9 @@ export default function Sidebar() {
               text-white/70 transition-colors hover:bg-[#FF2E93]/10 hover:text-[#FF2E93] ${focusRing}`}
                     >
                         <LogOut size={20} className="shrink-0" />
+
                         <span className={`text-sm ${hideLabel}`}>خروج</span>
+
                         <Tooltip>خروج</Tooltip>
                     </button>
                 </div>
